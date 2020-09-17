@@ -1,5 +1,5 @@
 FROM alpine:3.11
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata libcap
 RUN set -ex; \
 	apkArch="$(apk --print-arch)"; \
 	case "$apkArch" in \
@@ -11,7 +11,9 @@ RUN set -ex; \
 	wget --quiet -O /tmp/traefik.tar.gz "https://github.com/containous/traefik/releases/download/v2.3.0-rc5/traefik_v2.3.0-rc5_linux_$arch.tar.gz"; \
 	tar xzvf /tmp/traefik.tar.gz -C /usr/local/bin traefik; \
 	rm -f /tmp/traefik.tar.gz; \
-	chmod +x /usr/local/bin/traefik
+	chmod +x /usr/local/bin/traefik; \
+	setcap 'cap_net_bind_service=+ep' /usr/local/bin/traefik
+	
 COPY entrypoint.sh /
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]
